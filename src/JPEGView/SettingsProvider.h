@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Helpers.h"
 #include "FileList.h"
@@ -130,6 +130,11 @@ public:
 	bool FlashWindowAlert() { return m_bFlashWindowAlert; }
 	bool BeepSoundAlert() { return m_bBeepSoundAlert; }
 	double ZoomPauseFactor() { return m_zoomPauseFactor; }  // while internally this is represented in doubles, using a whole number percent simplifies it for the user... configuring doubles is not user friendly at all
+
+	bool UseCheckerboardAsTransparent() { return m_useCheckerboardAsTransparent; }
+	int CheckerboardSize() { return m_checkerboardSize; }
+	COLORREF ColorCheckerboard1() { return m_colorCheckerboard1; }
+	COLORREF ColorCheckerboard2() { return m_colorCheckerboard2; }
 
 	// Returns if a user INI file exists
 	bool ExistsUserINI();
@@ -296,6 +301,11 @@ private:
 	bool m_bFlashWindowAlert;
 	bool m_bBeepSoundAlert;
 	int m_zoomPauseFactor;
+
+	bool m_useCheckerboardAsTransparent;
+	int m_checkerboardSize;
+	COLORREF m_colorCheckerboard1;
+	COLORREF m_colorCheckerboard2;
 
 	std::list<CUserCommand*> m_userCommands;
 	std::list<CUserCommand*> m_openWithCommands;

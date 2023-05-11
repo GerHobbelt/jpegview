@@ -1,9 +1,10 @@
-#include "StdAfx.h"
+﻿#include "StdAfx.h"
 #include "ReaderTGA.h"
 #include "JPEGImage.h"
 #include "Helpers.h"
 #include "BasicProcessing.h"
 #include "MaxImageDef.h"
+#include "SettingsProvider.h"
 
 // The TGA reader has been adapted and extended from the TGA reader used in an example of the BOINC project
 // http://www.filewatcher.com/p/boinc-server-maker_7.0.27+dfsg-5_armhf.deb.5191030/usr/share/doc/boinc-server-maker/examples/tgalib.h.html
@@ -378,7 +379,22 @@ CJPEGImage* CReaderTGA::ReadTgaImage(LPCTSTR strFileName, COLORREF backgroundCol
 		{
 			for (int i = 0; i < width*height; i++)
 			{
-				*pImage32++ = AlphaBlendBackground(*pImage32, backgroundColor | ALPHA_OPAQUE);
+				COLORREF bgColor;
+				bool useCheckerboardAsTransparent = CSettingsProvider::This().UseCheckerboardAsTransparent();
+				if (useCheckerboardAsTransparent) {
+					int checkerboardSize = CSettingsProvider::This().CheckerboardSize();
+					COLORREF checkerboardColor1 = CSettingsProvider::This().ColorCheckerboard1();
+					COLORREF checkerboardColor2 = CSettingsProvider::This().ColorCheckerboard2();
+					int x = i % width;
+					int y = i / height;
+					int checkerX = x / checkerboardSize;
+					int checkerY = y / checkerboardSize;
+					bgColor = (checkerX + checkerY) % 2 == 0 ? checkerboardColor1 : checkerboardColor2;
+				}
+				else {
+					bgColor = backgroundColor;
+				}
+				*pImage32++ = AlphaBlendBackground(*pImage32, bgColor | ALPHA_OPAQUE);
 			}
 		}
 		else

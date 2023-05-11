@@ -1,4 +1,4 @@
-
+﻿
 #include "StdAfx.h"
 #include "ImageLoadThread.h"
 #include <gdiplus.h>
@@ -201,9 +201,32 @@ static CJPEGImage* ConvertGDIPlusBitmapToJPEGImage(Gdiplus::Bitmap* pBitmap, int
 	if (bHasAlphaChannel) {
 		pBmTarget = new Gdiplus::Bitmap(pBitmap->GetWidth(), pBitmap->GetHeight(), PixelFormat32bppRGB);
 		pBmGraphics = new Gdiplus::Graphics(pBmTarget);
-		COLORREF bkColor = CSettingsProvider::This().ColorTransparency();
-		Gdiplus::SolidBrush bkBrush(Gdiplus::Color(GetRValue(bkColor), GetGValue(bkColor), GetBValue(bkColor)));
-		pBmGraphics->FillRectangle(&bkBrush, 0, 0, pBmTarget->GetWidth(), pBmTarget->GetHeight());
+
+		bool useCheckerboardAsTransparent = CSettingsProvider::This().UseCheckerboardAsTransparent();
+		if (useCheckerboardAsTransparent) {
+			int checkerboardSize = CSettingsProvider::This().CheckerboardSize();
+			COLORREF checkerboardColor1 = CSettingsProvider::This().ColorCheckerboard1();
+			COLORREF checkerboardColor2 = CSettingsProvider::This().ColorCheckerboard2();
+			Gdiplus::SolidBrush bkBrush1(Gdiplus::Color(GetRValue(checkerboardColor1), GetGValue(checkerboardColor1), GetBValue(checkerboardColor1)));
+			Gdiplus::SolidBrush bkBrush2(Gdiplus::Color(GetRValue(checkerboardColor2), GetGValue(checkerboardColor2), GetBValue(checkerboardColor2)));
+			INT imageWidth = pBmTarget->GetWidth();
+			INT imageHeight = pBmTarget->GetHeight();
+			for (INT x = 0; x * checkerboardSize < imageWidth; x++) {
+				for (INT y = 0; y * checkerboardSize < imageHeight; y++) {
+					if ((x + y) % 2 == 0) {
+						pBmGraphics->FillRectangle(&bkBrush1, x * checkerboardSize, y * checkerboardSize, checkerboardSize, checkerboardSize);
+					}
+					else {
+						pBmGraphics->FillRectangle(&bkBrush2, x * checkerboardSize, y * checkerboardSize, checkerboardSize, checkerboardSize);
+					}
+				}
+			}
+		} else {
+			COLORREF bkColor = CSettingsProvider::This().ColorTransparency();
+			Gdiplus::SolidBrush bkBrush(Gdiplus::Color(GetRValue(bkColor), GetGValue(bkColor), GetBValue(bkColor)));
+			pBmGraphics->FillRectangle(&bkBrush, 0, 0, pBmTarget->GetWidth(), pBmTarget->GetHeight());
+		}
+
 		pBmGraphics->DrawImage(pBitmap, 0, 0, pBmTarget->GetWidth(), pBmTarget->GetHeight());
 		pBitmapToUse = pBmTarget;
 		if (pBmGraphics->GetLastStatus() == Gdiplus::OutOfMemory) {
@@ -642,9 +665,23 @@ void CImageLoadThread::ProcessReadWEBPRequest(CRequest * request) {
 			if (pPixelData && nBPP == 4) {
 				// Multiply alpha value into each AABBGGRR pixel
 				uint32* pImage32 = (uint32*)pPixelData;
-				for (int i = 0; i < nWidth * nHeight; i++)
-					*pImage32++ = WebpAlphaBlendBackground(*pImage32, CSettingsProvider::This().ColorTransparency());
-
+				for (int i = 0; i < nWidth * nHeight; i++) {
+					COLORREF bgColor;
+					bool useCheckerboardAsTransparent = CSettingsProvider::This().UseCheckerboardAsTransparent();
+					if (useCheckerboardAsTransparent) {
+						int checkerboardSize = CSettingsProvider::This().CheckerboardSize();
+						COLORREF checkerboardColor1 = CSettingsProvider::This().ColorCheckerboard1();
+						COLORREF checkerboardColor2 = CSettingsProvider::This().ColorCheckerboard2();
+						int x = i % nWidth;
+						int y = i / nWidth;
+						int checkerX = x / checkerboardSize;
+						int checkerY = y / checkerboardSize;
+						bgColor = (checkerX + checkerY) % 2 == 0 ? checkerboardColor1 : checkerboardColor2;
+					} else {
+						bgColor = CSettingsProvider::This().ColorTransparency();
+					}
+					*pImage32++ = WebpAlphaBlendBackground(*pImage32, bgColor);
+				}
 				if (bHasAnimation) {
 					m_sLastWebpFileName = sFileName;
 				}
@@ -971,8 +1008,24 @@ void CImageLoadThread::ProcessReadQOIRequest(CRequest* request) {
 				if (nBPP == 4) {
 					// Multiply alpha value into each AABBGGRR pixel
 					uint32* pImage32 = (uint32*)pPixelData;
-					for (int i = 0; i < nWidth * nHeight; i++)
+					for (int i = 0; i < nWidth * nHeight; i++) {
+						COLORREF bgColor;
+						bool useCheckerboardAsTransparent = CSettingsProvider::This().UseCheckerboardAsTransparent();
+						if (useCheckerboardAsTransparent) {
+							int checkerboardSize = CSettingsProvider::This().CheckerboardSize();
+							COLORREF checkerboardColor1 = CSettingsProvider::This().ColorCheckerboard1();
+							COLORREF checkerboardColor2 = CSettingsProvider::This().ColorCheckerboard2();
+							int x = i % nWidth;
+							int y = i / nWidth;
+							int checkerX = x / checkerboardSize;
+							int checkerY = y / checkerboardSize;
+							bgColor = (checkerX + checkerY) % 2 == 0 ? checkerboardColor1 : checkerboardColor2;
+						}
+						else {
+							bgColor = CSettingsProvider::This().ColorTransparency();
+						}
 						*pImage32++ = WebpAlphaBlendBackground(*pImage32, CSettingsProvider::This().ColorTransparency());
+					}
 				}
 				request->Image = new CJPEGImage(nWidth, nHeight, pPixelData, NULL, nBPP, 0, IF_QOI, false, 0, 1, 0);
 			}

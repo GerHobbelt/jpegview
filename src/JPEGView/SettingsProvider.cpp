@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+﻿#include "StdAfx.h"
 #include "SettingsProvider.h"
 #include "NLS.h"
 #include <float.h>
@@ -367,7 +367,11 @@ CSettingsProvider::CSettingsProvider(void) {
 			nGapIndex++;
 		}
 	} while (nGapIndex <= 2);
-	
+
+	m_useCheckerboardAsTransparent = GetBool(_T("UseCheckerboardAsTransparent"), false);
+	m_checkerboardSize = GetInt(_T("CheckerboardSize"), 16, 4, 128);
+	m_colorCheckerboard1 = GetColor(_T("CheckerboardColor1"), RGB(71, 71, 71));
+	m_colorCheckerboard2 = GetColor(_T("CheckerboardColor2"), RGB(102, 102, 102));
 }
 
 CImageProcessingParams CSettingsProvider::LandscapeModeParams(const CImageProcessingParams& templParams) {
