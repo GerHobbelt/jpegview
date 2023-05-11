@@ -6,6 +6,22 @@
 
 This is the official re-release of JPEGView.
 
+## What i did in this fork
+
+As a image browser, Everthing of JPEGView is perfect except the transparency of images show solid color which make it looks not that OK. I believe many people used to see transparent image with checkerboard background.
+So i add a feature to show checkerboard as transparency, also add config options (at the bottom of JPEGView.ini)
+```
+; If UseCheckerboardAsTransparent is true, Transparent parts of images will use checkerboard background, otherwise it will use TransparencyColor value. Here you can decide whether to use it, change the size and color. CheckerboardSize value should between 4 and 128
+UseCheckerboardAsTransparent=true
+CheckerboardSize=16
+CheckerboardColor1=71 71 71
+CheckerboardColor2=102 102 102
+```
+
+Important : JPEGView is unable to save an image with transparency - or rather the transparency is lost. The output image will has checkerboard background. In most case, I use it as image browser, so it is not a problem for me. If i want to modify image, i will use photoshop or some other tool.
+
+I am not familiar with JPEGView source code, so maybe the problem above can be avoid by change the logic of image modification code. I will try it latter.
+
 ## Description
 
 JPEGView is a lean, fast and highly configurable image viewer/editor with a minimal GUI.
