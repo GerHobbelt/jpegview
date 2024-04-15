@@ -14,7 +14,9 @@
 #define _WIN32_IE	0x0600
 #define _RICHEDIT_VER	0x0300
 
+#ifndef _CRT_SECURE_NO_DEPRECATE
 #define _CRT_SECURE_NO_DEPRECATE
+#endif
 
 #include <tchar.h>
 #include <atlbase.h>
