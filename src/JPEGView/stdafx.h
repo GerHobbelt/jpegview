@@ -40,7 +40,8 @@ extern CAppModule _Module;
 #pragma warning(pop)
 
 // STL stuff
-#include  <list>
+#include <list>
+#include <set>
 
 #define _SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS
 
