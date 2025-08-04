@@ -13,6 +13,9 @@
 #define _WIN32_WINNT	0x0501
 #define _WIN32_IE	0x0600
 #define _RICHEDIT_VER	0x0300
+#ifndef _RICHEDIT_VER
+#define _RICHEDIT_VER	0x0810
+#endif
 
 #ifndef _CRT_SECURE_NO_DEPRECATE
 #define _CRT_SECURE_NO_DEPRECATE
@@ -24,7 +27,7 @@
 #pragma warning(disable:4996)
 #pragma warning(disable:4838)
 #pragma warning(disable:4302)
-#include <atlapp.h>
+//#include <atlapp.h>
 #include <assert.h>
 
 extern CAppModule _Module;
