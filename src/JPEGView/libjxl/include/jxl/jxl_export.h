@@ -2,7 +2,7 @@
 #ifndef JXL_EXPORT_H
 #define JXL_EXPORT_H
 
-#ifdef JXL_STATIC_DEFINE
+#if defined(JXL_STATIC_DEFINE) || defined(BUILD_MONOLITHIC)
 #  define JXL_EXPORT
 #  define JXL_NO_EXPORT
 #else
